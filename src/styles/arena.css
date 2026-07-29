@@ -293,13 +293,6 @@
   border-radius: 4px;
   width: fit-content;
 }
-.uno-grace-hint {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--uno-yellow);
-  letter-spacing: 0.04em;
-  opacity: 0.85;
-}
 .btn-counter-uno {
   background: linear-gradient(135deg, #f59e0b, #d97706);
   color: #fff;

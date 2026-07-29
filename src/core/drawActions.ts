@@ -100,11 +100,6 @@ export function challengeUno(
   const challenger = state.players.find((p) => p.id === challengerId);
   if (!target || !challenger) return false;
   if (target.hand.length !== 1 || target.calledUno) return false;
-  const windowOpen =
-    state.unoPendingPlayerId === targetId &&
-    state.unoWindowUntil != null &&
-    Date.now() < state.unoWindowUntil;
-  if (windowOpen) return false;
 
   const drawn = drawFromPile(state, 2);
   target.hand.push(...drawn);
