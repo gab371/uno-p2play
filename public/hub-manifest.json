@@ -1,0 +1,10 @@
+{
+  "key": "uno",
+  "name": "P2Uno",
+  "emoji": "🃏",
+  "desc": "Cartes couleur, house rules Ubisoft & cri UNO !",
+  "hasPreConfig": true,
+  "avatars": ["🃏", "🔴", "🟡", "🟢", "🔵", "⭐"],
+  "shellBackground": "radial-gradient(circle at center, #0a1f4d 0%, #060d1c 55%, #09090b 100%)",
+  "repo": "gab371/uno-p2play"
+}
