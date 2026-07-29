@@ -13,6 +13,7 @@ import {
 } from "../network/protocol";
 import type { NetworkMessage } from "../network/protocol";
 import type { Color, GameConfig, GameState, TeamId } from "../core/types";
+import { isDebugModeAllowed } from "../lib/debugMode";
 
 interface UseGameOptions {
   externalPeerManager?: import("p2play-core").PeerManagerLike;
@@ -197,6 +198,33 @@ export function useGame(options?: UseGameOptions) {
     options?.playerName,
     options?.playerAvatar,
   ]);
+
+  /** Host-only console helpers: `window.__P2UNO_DEBUG__` (gated by VITE_ALLOW_DEBUG_MODE). */
+  useEffect(() => {
+    if (!isHost || !isDebugModeAllowed()) {
+      delete (window as unknown as { __P2UNO_DEBUG__?: unknown }).__P2UNO_DEBUG__;
+      return;
+    }
+    (window as unknown as {
+      __P2UNO_DEBUG__: {
+        engine: typeof gameEngineRef.current;
+        myPeerId: string | null;
+        sync: () => void;
+      };
+    }).__P2UNO_DEBUG__ = {
+      get engine() {
+        return gameEngineRef.current;
+      },
+      myPeerId,
+      sync: () => {
+        const eng = gameEngineRef.current;
+        if (eng) broadcastSanitizedStates(eng.state);
+      },
+    };
+    return () => {
+      delete (window as unknown as { __P2UNO_DEBUG__?: unknown }).__P2UNO_DEBUG__;
+    };
+  }, [isHost, myPeerId, broadcastSanitizedStates]);
 
   useEffect(() => {
     if (!options?.isEmbedded || isHost || !myPeerId) return;

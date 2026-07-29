@@ -23,11 +23,13 @@ export function applyCardEffect(
   const player = state.players.find((p) => p.id === playerId)!;
 
   if (card.rank === "SKIP") {
+    if (card.color !== "WILD") state.currentColor = card.color;
     addLog(state, `${player.name} joue Passe.`, "action");
     advanceTurn(state, true);
     return;
   }
   if (card.rank === "REVERSE") {
+    if (card.color !== "WILD") state.currentColor = card.color;
     if (state.players.length === 2) {
       addLog(state, `${player.name} inverse (= passe).`, "action");
       advanceTurn(state, true);
@@ -39,6 +41,7 @@ export function applyCardEffect(
     return;
   }
   if (card.rank === "DRAW_TWO") {
+    if (card.color !== "WILD") state.currentColor = card.color;
     state.pendingDraw += 2;
     state.pendingDrawKind = "DRAW_TWO";
     addLog(state, `${player.name} joue +2 (pile ${state.pendingDraw}).`, "action");

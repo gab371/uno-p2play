@@ -19,8 +19,29 @@ describe("house rules toggles", () => {
     });
     eng.playCard("a", "d2a");
     expect(eng.state.pendingDraw).toBe(2);
+    expect(eng.state.currentColor).toBe("RED");
     eng.playCard("b", "d2b");
     expect(eng.state.pendingDraw).toBe(4);
+    expect(eng.state.currentColor).toBe("BLUE");
+  });
+
+  it("stacking: yellow +2 on blue +2 sets current color to yellow", () => {
+    const eng = setupPlayers(["a", "b", "c"], { stacking: true });
+    dealFixed(eng, {
+      top: card("t", "GREEN", 3),
+      currentColor: "BLUE",
+      hands: {
+        a: [card("d2b", "BLUE", "DRAW_TWO"), card("ka", "RED", 1)],
+        b: [card("d2y", "YELLOW", "DRAW_TWO"), card("kb", "GREEN", 8)],
+        c: [card("kc", "RED", 2)],
+      },
+      activeId: "a",
+    });
+    eng.playCard("a", "d2b");
+    expect(eng.state.currentColor).toBe("BLUE");
+    eng.playCard("b", "d2y");
+    expect(eng.state.pendingDraw).toBe(4);
+    expect(eng.state.currentColor).toBe("YELLOW");
   });
 
   it("stacking off: cannot answer +2 with +2", () => {
