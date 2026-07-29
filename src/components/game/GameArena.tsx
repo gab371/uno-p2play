@@ -4,6 +4,7 @@ import { LocalHand } from "./LocalHand";
 import { UnoCardFace } from "./UnoCardFace";
 import { ColorPicker } from "./UnoCard";
 import { assignSeats, SEAT_META, type SeatFacing, type SeatId } from "./seats";
+import { useDeadlinePassed } from "../../hooks/useDeadlinePassed";
 
 interface GameArenaProps {
   gameState: GameState;
@@ -28,6 +29,8 @@ function OpponentSeat({
   onChallengeUno,
   className,
   facing,
+  unoPendingPlayerId,
+  unoWindowUntil,
 }: {
   player: Player;
   active: boolean;
@@ -35,11 +38,19 @@ function OpponentSeat({
   onChallengeUno: (id: string) => void;
   className: string;
   facing: SeatFacing;
+  unoPendingPlayerId: string | null;
+  unoWindowUntil: number | null;
 }) {
+  const pendingThis = unoPendingPlayerId === player.id;
+  const graceUntil = pendingThis ? unoWindowUntil : null;
+  const graceOver = useDeadlinePassed(graceUntil);
+  const inGrace = pendingThis && !graceOver;
+
   const canContre =
     player.hand.length === 1 &&
     !player.calledUno &&
-    player.id !== myPeerId;
+    player.id !== myPeerId &&
+    !inGrace;
 
   return (
     <div className={`player-seat ${className} ${active ? "active-turn" : ""}`}>
@@ -52,6 +63,11 @@ function OpponentSeat({
           {player.hand.length} carte{player.hand.length > 1 ? "s" : ""}
         </span>
         {player.calledUno && <span className="uno-badge">UNO !</span>}
+        {inGrace && (
+          <span className="uno-grace-hint" title="Temps pour dire UNO">
+            UNO…
+          </span>
+        )}
         {canContre && (
           <button
             type="button"
@@ -111,6 +127,8 @@ export function GameArena({
               onChallengeUno={onChallengeUno}
               className={meta.className}
               facing={meta.facing}
+              unoPendingPlayerId={gameState.unoPendingPlayerId}
+              unoWindowUntil={gameState.unoWindowUntil}
             />
           );
         })}

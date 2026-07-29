@@ -105,12 +105,10 @@ export function handleHostAction(
       if (engine.callUno(playerId)) playSfx("uno");
       break;
     case "CHALLENGE_UNO":
-      engine.challengeUno(playerId, payload.targetId as string);
-      playSfx("click");
+      if (engine.challengeUno(playerId, payload.targetId as string)) playSfx("click");
       break;
     case "CHALLENGE_WILD_DRAW_FOUR":
-      engine.challengeWildDrawFour(playerId);
-      playSfx("click");
+      if (engine.challengeWildDrawFour(playerId)) playSfx("click");
       break;
     case "CHOOSE_COLOR":
       if (engine.chooseColor(playerId, payload.color as Color)) playSfx("wild");

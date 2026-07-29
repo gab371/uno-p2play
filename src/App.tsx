@@ -76,6 +76,19 @@ export default function App({
   }, [showLobby]);
 
   useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("p2play:board-expand", { detail: { expanded: boardExpanded } }),
+    );
+    return () => {
+      if (boardExpanded) {
+        window.dispatchEvent(
+          new CustomEvent("p2play:board-expand", { detail: { expanded: false } }),
+        );
+      }
+    };
+  }, [boardExpanded]);
+
+  useEffect(() => {
     if (!boardExpanded) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setBoardExpanded(false);

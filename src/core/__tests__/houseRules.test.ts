@@ -213,6 +213,24 @@ describe("house rules toggles", () => {
     expect(eng.state.players[0]!.hand.length).toBe(3);
   });
 
+  it("UNO challenge blocked during call window", () => {
+    const eng = setupPlayers(["a", "b"]);
+    dealFixed(eng, {
+      top: card("t", "RED", 1),
+      drawPile: [card("d1", "GREEN", 1), card("d2", "GREEN", 2)],
+      hands: {
+        a: [card("only", "RED", 1)],
+        b: [card("kb", "BLUE", 2)],
+      },
+      activeId: "b",
+    });
+    eng.state.players[0]!.calledUno = false;
+    eng.state.unoPendingPlayerId = "a";
+    eng.state.unoWindowUntil = Date.now() + 10_000;
+    expect(eng.challengeUno("b", "a")).toBe(false);
+    expect(eng.state.players[0]!.hand.length).toBe(1);
+  });
+
   it("callUno blocks challenge", () => {
     const eng = setupPlayers(["a", "b"]);
     dealFixed(eng, {
