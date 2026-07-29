@@ -24,13 +24,14 @@ export const SEAT_META: Record<
   bottomRight: { className: "seat-bottom-right", facing: "south" },
 };
 
-/** Clockwise seats from local (south), for 2–8 players. */
+/** Clockwise seats from local (south), matching `direction === 1`. */
 function seatOrder(playerCount: number): SeatId[] {
   switch (playerCount) {
     case 2:
       return ["top"];
     case 3:
-      return ["right", "left"];
+      // bottom → left → right (clockwise on screen)
+      return ["left", "right"];
     case 4:
       return ["left", "top", "right"];
     case 5:

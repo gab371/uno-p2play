@@ -132,10 +132,23 @@ export function GameArena({
                 strokeWidth="3"
                 strokeDasharray="6 4"
               />
-              <polygon points="50,4 50,16 62,10" fill="#FCD116" />
-              <polygon points="84,50 96,50 90,62" fill="#FCD116" />
-              <polygon points="50,96 50,84 38,90" fill="#FCD116" />
-              <polygon points="16,50 4,50 10,38" fill="#FCD116" />
+              {gameState.direction === 1 ? (
+                <>
+                  {/* Tips point clockwise */}
+                  <polygon points="50,4 50,16 62,10" fill="#FCD116" />
+                  <polygon points="84,50 96,50 90,62" fill="#FCD116" />
+                  <polygon points="50,96 50,84 38,90" fill="#FCD116" />
+                  <polygon points="16,50 4,50 10,38" fill="#FCD116" />
+                </>
+              ) : (
+                <>
+                  {/* Tips point counter-clockwise */}
+                  <polygon points="50,4 50,16 38,10" fill="#FCD116" />
+                  <polygon points="84,50 96,50 90,38" fill="#FCD116" />
+                  <polygon points="50,96 50,84 62,90" fill="#FCD116" />
+                  <polygon points="16,50 4,50 10,62" fill="#FCD116" />
+                </>
+              )}
             </svg>
           </div>
           <div className={`active-color-aura ${colorClass}`} />
