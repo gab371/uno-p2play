@@ -3,6 +3,7 @@ import { handleHostAction } from "../../hooks/hostActions";
 import { card, dealFixed, setupPlayers } from "./testHelpers";
 import type { NetworkMessage } from "../../network/protocol";
 import type { UnoGameEngine } from "../gameEngine";
+import type { Rank } from "../types";
 
 const noopJoin = {
   handleJoinGameSeat: () => ({ kind: "added_player" as const }),
@@ -29,7 +30,7 @@ describe("action security (turnNonce / spam draw)", () => {
     dealFixed(eng, {
       top: card("t", "RED", 1),
       drawPile: Array.from({ length: 30 }, (_, i) =>
-        card(`d${i}`, "GREEN", (i % 9) + 1),
+        card(`d${i}`, "GREEN", (((i % 9) + 1) as Rank)),
       ),
       hands: {
         a: [card("ka", "RED", 2)],
