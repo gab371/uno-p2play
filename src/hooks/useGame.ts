@@ -55,6 +55,12 @@ export function useGame(options?: UseGameOptions) {
     (engineState: GameState, overridePeerId?: string) => {
       const activePeerId = overridePeerId || myPeerId;
       if (!activePeerId) return;
+      for (const p of engineState.players) {
+        peerManager.registerPeerProfile?.(p.id, { username: p.name, avatar: p.avatar });
+      }
+      for (const s of engineState.spectators) {
+        peerManager.registerPeerProfile?.(s.id, { username: s.name, avatar: s.avatar });
+      }
       const sent = new Set<string>([activePeerId]);
       const resolveConn = (id: string) => {
         let conn = peerManager.connections.get(id);
@@ -167,11 +173,17 @@ export function useGame(options?: UseGameOptions) {
       peerManager,
       getEngine: getSeatEngine,
       onBroadcast: () => broadcastSanitizedStates(engine.state),
-      onHostAction: (_sender, actionMsg) => {
+      onHostAction: (senderPeerId, actionMsg) => {
+        const raw = actionMsg as NetworkMessage;
+        // Never trust client-supplied playerId — identity is the DataConnection peer.
+        const msg =
+          raw.type === "ACTION"
+            ? ({ ...raw, playerId: senderPeerId } as NetworkMessage)
+            : raw;
         handleHostAction(
           engine,
           myPeerId,
-          actionMsg as NetworkMessage,
+          msg,
           playSfx,
           getSeatEngine,
           { handleJoinGameSeat },
@@ -279,6 +291,17 @@ export function useGame(options?: UseGameOptions) {
     [joinGame, peerManager],
   );
 
+  /** Echo host `turnNonce` so stale/queued turn-bound actions are dropped. */
+  const sendTurnAction = useCallback(
+    (actionName: string, payload: Record<string, unknown> = {}) => {
+      sendAction(actionName, {
+        ...payload,
+        turnNonce: gameState?.turnNonce ?? -1,
+      });
+    },
+    [sendAction, gameState?.turnNonce],
+  );
+
   return {
     isHost,
     myPeerId,
@@ -303,17 +326,17 @@ export function useGame(options?: UseGameOptions) {
     lockSpectator: (peerId: string, locked: boolean) =>
       sendAction("LOCK_SPECTATOR", { peerId, locked }),
     playCard: (cardId: string, chosenColor?: Color) =>
-      sendAction("PLAY_CARD", { cardId, chosenColor }),
+      sendTurnAction("PLAY_CARD", { cardId, chosenColor }),
     jumpIn: (cardId: string, chosenColor?: Color) =>
-      sendAction("JUMP_IN", { cardId, chosenColor }),
-    drawCard: () => sendAction("DRAW", {}),
-    passTurn: () => sendAction("PASS_TURN", {}),
+      sendTurnAction("JUMP_IN", { cardId, chosenColor }),
+    drawCard: () => sendTurnAction("DRAW", {}),
+    passTurn: () => sendTurnAction("PASS_TURN", {}),
     callUno: () => sendAction("CALL_UNO", {}),
     challengeUno: (targetId: string) =>
       sendAction("CHALLENGE_UNO", { targetId }),
-    challengeWildDrawFour: () => sendAction("CHALLENGE_WILD_DRAW_FOUR", {}),
-    chooseColor: (color: Color) => sendAction("CHOOSE_COLOR", { color }),
-    chooseSwap: (targetId: string) => sendAction("CHOOSE_SWAP", { targetId }),
+    challengeWildDrawFour: () => sendTurnAction("CHALLENGE_WILD_DRAW_FOUR", {}),
+    chooseColor: (color: Color) => sendTurnAction("CHOOSE_COLOR", { color }),
+    chooseSwap: (targetId: string) => sendTurnAction("CHOOSE_SWAP", { targetId }),
     sendChatMessage: (text: string) =>
       sendChat(localPlayerName || "Joueur", text),
     disconnect,

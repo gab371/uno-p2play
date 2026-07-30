@@ -24,7 +24,7 @@ import {
   setTeam,
   addLog,
 } from "./lobby";
-import { dealRound, endRound } from "./round";
+import { bumpTurnNonce, dealRound, endRound } from "./round";
 import type { Color, GameConfig, GameState } from "./types";
 
 function initialState(): GameState {
@@ -53,6 +53,7 @@ function initialState(): GameState {
     jumpInOpen: false,
     lastPlayedCard: null,
     hasDrawnThisTurn: false,
+    turnNonce: 0,
     winnerId: null,
     winningTeam: null,
     roundWinnerId: null,
@@ -174,6 +175,7 @@ export class UnoGameEngine {
 
     if (opts?.jumpIn) {
       s.activePlayerIndex = s.players.findIndex((p) => p.id === playerId);
+      bumpTurnNonce(s);
       addLog(s, `${player.name} joue à la volée !`, "action");
     }
 

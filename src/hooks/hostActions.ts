@@ -4,6 +4,24 @@ import type { NetworkMessage } from "../network/protocol";
 
 type PlaySfx = (name: string) => void;
 
+/** Turn-bound actions: require matching `turnNonce` to drop queued/spam moves. */
+const TURN_BOUND_ACTIONS = new Set([
+  "PLAY_CARD",
+  "JUMP_IN",
+  "DRAW",
+  "PASS_TURN",
+  "CHOOSE_COLOR",
+  "CHOOSE_SWAP",
+  "CHALLENGE_WILD_DRAW_FOUR",
+]);
+
+function matchesTurnNonce(
+  engine: UnoGameEngine,
+  payload: Record<string, unknown> | undefined,
+): boolean {
+  return payload?.turnNonce === engine.state.turnNonce;
+}
+
 /** Host-side ACTION dispatch — kept out of useGame to stay under 300 LOC. */
 export function handleHostAction(
   engine: UnoGameEngine,
@@ -20,6 +38,13 @@ export function handleHostAction(
   if (msg.type !== "ACTION") return;
   const { actionName, playerId, payload } = msg;
   const { handleJoinGameSeat } = joinHelpers;
+
+  if (
+    TURN_BOUND_ACTIONS.has(actionName) &&
+    !matchesTurnNonce(engine, payload as Record<string, unknown> | undefined)
+  ) {
+    return;
+  }
 
   switch (actionName) {
     case "JOIN_GAME":
@@ -50,9 +75,13 @@ export function handleHostAction(
       if (playerId === myPeerId)
         engine.setConfig(payload.config as Partial<GameConfig>);
       break;
-    case "SET_TEAM":
-      engine.setTeam(payload.peerId as string, payload.team as TeamId);
+    case "SET_TEAM": {
+      const targetId = payload.peerId as string;
+      if (playerId === myPeerId || targetId === playerId) {
+        engine.setTeam(targetId, payload.team as TeamId);
+      }
       break;
+    }
     case "SET_ROLE": {
       const targetId = payload.peerId as string;
       const nextRole = payload.role as "player" | "spectator";
@@ -98,8 +127,7 @@ export function handleHostAction(
       if (engine.drawCard(playerId)) playSfx("draw");
       break;
     case "PASS_TURN":
-      engine.passTurn(playerId);
-      playSfx("click");
+      if (engine.passTurn(playerId)) playSfx("click");
       break;
     case "CALL_UNO":
       if (engine.callUno(playerId)) playSfx("uno");
@@ -114,8 +142,7 @@ export function handleHostAction(
       if (engine.chooseColor(playerId, payload.color as Color)) playSfx("wild");
       break;
     case "CHOOSE_SWAP":
-      engine.chooseSwapTarget(playerId, payload.targetId as string);
-      playSfx("click");
+      if (engine.chooseSwapTarget(playerId, payload.targetId as string)) playSfx("click");
       break;
   }
 }

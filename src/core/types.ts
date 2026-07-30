@@ -100,6 +100,11 @@ export interface GameState {
   jumpInOpen: boolean;
   lastPlayedCard: Card | null;
   hasDrawnThisTurn: boolean;
+  /**
+   * Bumps on every turn change. Clients echo it on actions; host rejects
+   * mismatched nonces so queued/spam moves cannot apply on a later turn.
+   */
+  turnNonce: number;
   winnerId: string | null;
   winningTeam: TeamId | null;
   roundWinnerId: string | null;

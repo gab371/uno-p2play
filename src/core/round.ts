@@ -35,12 +35,17 @@ export function nextIndex(state: GameState, from = state.activePlayerIndex): num
   return (from + state.direction + n * 10) % n;
 }
 
+export function bumpTurnNonce(state: GameState): void {
+  state.turnNonce = (state.turnNonce ?? 0) + 1;
+}
+
 export function advanceTurn(state: GameState, skip = false): void {
   state.activePlayerIndex = nextIndex(state);
   if (skip) state.activePlayerIndex = nextIndex(state);
   state.hasDrawnThisTurn = false;
   // jumpInOpen is managed by playCard (kept open after a play)
   state.wildDrawFourChallengeOpen = false;
+  bumpTurnNonce(state);
 }
 
 export function dealRound(state: GameState): boolean {
@@ -105,6 +110,7 @@ export function dealRound(state: GameState): boolean {
   state.activePlayerIndex = 0;
   state.roundWinnerId = null;
   state.phase = "PLAYING";
+  bumpTurnNonce(state);
   syncDrawCount(state);
 
   // Apply opening action card lightly
