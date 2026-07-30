@@ -186,7 +186,10 @@ export function useGame(options?: UseGameOptions) {
           msg,
           playSfx,
           getSeatEngine,
-          { handleJoinGameSeat },
+          {
+            handleJoinGameSeat,
+            getTrustedUsername: (id) => peerManager.getTrustedUsername?.(id),
+          },
         );
         broadcastSanitizedStates(engine.state);
         if (engine.state.phase === "GAME_OVER" && !victoryPlayedRef.current) {

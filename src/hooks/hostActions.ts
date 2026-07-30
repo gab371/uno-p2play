@@ -33,11 +33,12 @@ export function handleHostAction(
   >,
   joinHelpers: {
     handleJoinGameSeat: typeof import("p2play-core/presence").handleJoinGameSeat;
+    getTrustedUsername?: (playerId: string) => string | undefined;
   },
 ): void {
   if (msg.type !== "ACTION") return;
   const { actionName, playerId, payload } = msg;
-  const { handleJoinGameSeat } = joinHelpers;
+  const { handleJoinGameSeat, getTrustedUsername } = joinHelpers;
 
   if (
     TURN_BOUND_ACTIONS.has(actionName) &&
@@ -55,6 +56,7 @@ export function handleHostAction(
           name: payload?.name as string,
           avatar: payload?.avatar as string,
         },
+        trustedName: getTrustedUsername?.(playerId),
         isHostPlayer: playerId === myPeerId,
         addPlayer: (id, name, avatar, host) =>
           engine.addPlayer(id, name, avatar, host),
