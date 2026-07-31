@@ -88,6 +88,7 @@ export function useGame(options?: UseGameOptions) {
             state: sanitizeGameState(engineState, p.id),
           });
           sent.add(p.id);
+          sent.add(conn.peer);
         }
       });
 
@@ -100,24 +101,16 @@ export function useGame(options?: UseGameOptions) {
             state: JSON.parse(JSON.stringify(spectatorView)),
           });
           sent.add(s.id);
+          sent.add(conn.peer);
         }
       });
 
       peerManager.connections.forEach((conn, peerId) => {
-        if (!conn.open || sent.has(peerId)) return;
-        const known =
-          engineState.players.some(
-            (p) => p.id === peerId || peerId.endsWith(p.id) || p.id.endsWith(peerId),
-          ) ||
-          engineState.spectators.some(
-            (s) => s.id === peerId || peerId.endsWith(s.id) || s.id.endsWith(peerId),
-          );
-        if (!known) {
-          conn.send({
-            type: "STATE_UPDATE",
-            state: JSON.parse(JSON.stringify(spectatorView)),
-          });
-        }
+        if (!conn.open || sent.has(peerId) || sent.has(conn.peer)) return;
+        conn.send({
+          type: "STATE_UPDATE",
+          state: JSON.parse(JSON.stringify(spectatorView)),
+        });
       });
     },
     [myPeerId, peerManager, p2p.peerManager],
