@@ -90,6 +90,38 @@ describe("house rules toggles", () => {
     expect(eng.state.players[1]!.hand.map((c) => c.id)).toContain("x");
   });
 
+  it("sevenZero: red 7 on blue 7 updates current color", () => {
+    const eng = setupPlayers(["a", "b", "c"], { sevenZero: true });
+    dealFixed(eng, {
+      top: card("t", "BLUE", 7),
+      currentColor: "BLUE",
+      hands: {
+        a: [card("s7", "RED", 7), card("x", "YELLOW", 2)],
+        b: [card("y", "BLUE", 3)],
+        c: [card("z", "GREEN", 4)],
+      },
+      activeId: "a",
+    });
+    eng.playCard("a", "s7");
+    expect(eng.state.currentColor).toBe("RED");
+    expect(eng.state.phase).toBe("SWAP_PICK");
+  });
+
+  it("sevenZero: green 0 on blue 0 updates current color", () => {
+    const eng = setupPlayers(["a", "b"], { sevenZero: true });
+    dealFixed(eng, {
+      top: card("t", "BLUE", 0),
+      currentColor: "BLUE",
+      hands: {
+        a: [card("z", "GREEN", 0), card("x", "YELLOW", 2)],
+        b: [card("y", "RED", 3)],
+      },
+      activeId: "a",
+    });
+    eng.playCard("a", "z");
+    expect(eng.state.currentColor).toBe("GREEN");
+  });
+
   it("sevenZero: 7 opens swap pick", () => {
     const eng = setupPlayers(["a", "b", "c"], { sevenZero: true });
     dealFixed(eng, {
@@ -193,6 +225,11 @@ describe("house rules toggles", () => {
     expect(ids).toContain("g1");
     expect(ids).toContain("b2");
     expect(ids).toContain("r7");
+    // Turn must stay with the drawer so they can play the matched card.
+    expect(activeId(eng)).toBe("a");
+    expect(eng.state.hasDrawnThisTurn).toBe(true);
+    expect(eng.playCard("a", "r7")).toBe(true);
+    expect(activeId(eng)).toBe("b");
   });
 
   it("UNO challenge works immediately (no grace block)", () => {

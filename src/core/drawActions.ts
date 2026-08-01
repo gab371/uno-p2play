@@ -47,11 +47,16 @@ export function drawCard(
       const c = drawn[0]!;
       player.hand.push(c);
       state.hasDrawnThisTurn = true;
+      addLog(state, `${player.name} pioche jusqu'à une carte jouable.`, "info");
       if (hr.forcePlay && isPlayable(c, state.currentColor, top, 0, null, false)) {
         return playCard(playerId, c.id);
       }
+      // Stay on turn: player may play the matched card or pass.
+      return true;
     }
-    if (!hr.forcePlay) advanceTurn(state);
+    // Empty pile / no match left — allow pass.
+    state.hasDrawnThisTurn = true;
+    addLog(state, `${player.name} ne peut plus piocher.`, "warning");
     return true;
   }
 

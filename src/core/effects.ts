@@ -49,12 +49,14 @@ export function applyCardEffect(
     return;
   }
   if (hr.sevenZero && card.rank === 7) {
+    if (card.color !== "WILD") state.currentColor = card.color;
     state.phase = "SWAP_PICK";
     state.swapPickerPlayerId = playerId;
     addLog(state, `${player.name} doit échanger sa main (7).`, "action");
     return;
   }
   if (hr.sevenZero && card.rank === 0) {
+    if (card.color !== "WILD") state.currentColor = card.color;
     rotateHands(state);
     addLog(state, "Toutes les mains tournent (0) !", "action");
     advanceTurn(state);
