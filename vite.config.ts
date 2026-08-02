@@ -8,12 +8,12 @@ const pkg = JSON.parse(
 );
 
 const reactAliases = {
-  react: path.resolve(__dirname, "node_modules/react"),
-  "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
-  "react-dom/client": path.resolve(__dirname, "node_modules/react-dom/client"),
-  "react/jsx-runtime": path.resolve(__dirname, "node_modules/react/jsx-runtime.js"),
+  react: path.resolve(import.meta.dirname, "node_modules/react"),
+  "react-dom": path.resolve(import.meta.dirname, "node_modules/react-dom"),
+  "react-dom/client": path.resolve(import.meta.dirname, "node_modules/react-dom/client"),
+  "react/jsx-runtime": path.resolve(import.meta.dirname, "node_modules/react/jsx-runtime.js"),
   "react/jsx-dev-runtime": path.resolve(
-    __dirname,
+    import.meta.dirname,
     "node_modules/react/jsx-dev-runtime.js",
   ),
 };
@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       dedupe: ["react", "react-dom"],
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": path.resolve(import.meta.dirname, "./src"),
         ...(isLib ? reactAliases : {}),
       },
     },
@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
       ? {
           outDir: "dist",
           lib: {
-            entry: path.resolve(__dirname, "src/main.tsx"),
+            entry: path.resolve(import.meta.dirname, "src/main.tsx"),
             name: "GameUno",
             formats: ["es"],
             fileName: () => "index.js",
